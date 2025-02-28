@@ -115,6 +115,10 @@ Slack には AWS Chatbot 経由で通知されます。
 検出されたSG数: 13
 S3ダウンロードリンク: ダウンロード(link URL）
 ```
+
+![Slack 通知例](img/slack.png)
+
+
 ---
 ### 使用技術
 
@@ -129,6 +133,11 @@ S3ダウンロードリンク: ダウンロード(link URL）
 •  AWS Chatbot
 
 •  Slack API
+
+---
+### 構成図
+
+![構成図](img/notification-unused-sg.png)
 
 ---
 ### ライセンス
