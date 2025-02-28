@@ -1,21 +1,21 @@
 
 ## Unused Security Groups Checker
 
-  
-
-AWS Lambda（SAM）を使用して **未使用の Security Group を検出し、S3 にエクスポートし、Slack に通知する** ツールです。
+**定期的に未使用の Security Group を検出し、S3 にエクスポート&Slack に通知する** ツールです。
 
  ---
 
 ### 機能概要
 
-•  未使用の Security Group（SG）を自動検出
+-  未使用の Security Group（SG）を自動検出
 
-•  S3 にエクセルファイル（.xlsx）として出力
+-  S3 にエクセルファイル（.xlsx）として出力
 
-•  AWS Chatbot 経由で Slack に通知
+-  EventBrigdeにより毎月1日0時(JST)に実行
 
-•  AWS SAM によるデプロイ
+-  AWS Chatbot 経由で Slack に通知
+
+-  AWS SAM によるデプロイ
 
 ### 前提
 
@@ -24,7 +24,6 @@ AWS Lambda（SAM）を使用して **未使用の Security Group を検出し、
 ---
 
 ### デプロイ手順
-
   
 
 **1. AWS SAM のセットアップ**
@@ -37,23 +36,34 @@ sam --version  # SAM CLI のバージョン確認
 **2. 環境変数の設定**
 
   
-makefile.template をコピーして、環境に合わせたmakefileを作成してください。
+makefile.template をコピーして、環境に合わせたmakefileを作成。
 
 指定する必要がある変数
 
 ```
 (ENV)_S3_BUCKET  出力先のS3バケット
-(ENV)_S3_PREFIX   出力先のS3プレフィックス
+(ENV)_S3_PREFIX  出力先のS3プレフィックス
 ```
 
-**4. デプロイ**
+また、定期実行間隔を調整する場合には以下を修正
+
+デフォルトは毎月1日0時(JST)
+
+template.yaml
 
 ```
-make deploy-dev   # 開発環境
-make deploy-prod  # 本番環境
+    Schedule: cron(0 15 1 * ? *)  # JST 0:00 (UTC 15:00)
 ```
 
-**5. Chatbot -> SNS連携**
+
+
+**3. デプロイ**
+
+```
+make deploy-dev   # 開発環境の場合
+```
+
+**4. Chatbot -> SNS連携**
 
 事前にslack連携済みのChatbotの通知設定にて、今回作成したSNSトピックを追加する。
 
