@@ -1,7 +1,7 @@
 
 ## Unused Security Groups Checker
 
-**定期的に未使用の Security Group を検出し、S3 にエクスポート&Slack に通知する** ツールです。
+**定期的に未使用のSecurityGroupを検出しエクセルにてリストを作成、S3 にエクスポート、Slack に通知する** ツールです。
 
  ---
 
