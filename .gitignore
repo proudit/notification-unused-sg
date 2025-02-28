@@ -1,0 +1,44 @@
+#configファイル
+makefile
+
+# AWS SAM ビルドアーティファクト
+.aws-sam/
+samconfig.toml
+
+# AWS CloudFormation の一時ファイル
+cdk.context.json
+cdk.out/
+.template/
+
+# Python の仮想環境
+venv/
+.env
+.envrc
+.pip-cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# AWS CLI の一時ファイル
+*.log
+*.bak
+*.swp
+.history
+.aws/
+
+# S3 にアップロードされたアーティファクト
+packaged.yaml
+deployments/
+
+# IDE / エディタの設定ファイル
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# MacOS 系ファイル
+.DS_Store
+.AppleDouble
+.LSOverride
+

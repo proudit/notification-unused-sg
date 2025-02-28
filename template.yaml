@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Environment:
+    Type: String
+    Default: "dev"
+  S3Bucket:
+    Type: String
+    Default: "your-default-bucket"
+  S3Prefix:
+    Type: String
+    Default: "unused-sg"
+
+Resources:
+  UnusedSGLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: UnusedSecurityGroupsCheck
+      Runtime: python3.12
+      Handler: app.lambda_handler
+      Timeout: 300
+      MemorySize: 256
+      Role: !GetAtt UnusedSGLambdaRole.Arn
+      Environment:
+        Variables:
+          S3_BUCKET: !Ref S3Bucket
+          S3_PREFIX: !Ref S3Prefix
+          ENV: !Ref Environment
+          SNS_TOPIC_ARN: !Ref SlackNotificationTopic
+      Events:
+        ScheduledEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 15 1 1,2,7,8 ? *)  # JST 0:00 (UTC 15:00)
+
+  #Lambda IAM Role 定義
+  UnusedSGLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: UnusedSGLambdaRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: PublishToSNS
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref SlackNotificationTopic
+        - PolicyName: S3WriteAccessToUnusedSGBucket
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${UnusedSGBucket}"
+                  - !Sub "arn:aws:s3:::${UnusedSGBucket}/*"
+
+  SlackNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "UnusedSGNotificationTopic"
+
+  UnusedSGBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3Bucket 
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled

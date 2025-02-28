@@ -1,0 +1,38 @@
+#############################
+# 環境毎の設定
+# S3バケットの設定
+# DEV
+DEV_S3_BUCKET = "XXXXX"  # DEV データ保存用S3 (出力先)
+DEV_S3_PREFIX = "XXXXX"  # DEV データ保存用S3Prefix (出力先)
+
+# PRD
+PRD_S3_BUCKET = "XXXXX"  # PRD データ保存用S3 (出力先)
+PRD_S3_PREFIX = "XXXXX"  # PRD データ保存用S3Prefix (出力先)
+#############################
+
+# 共通設定
+STACK_NAME_BASE = output-unused-sg
+TEMPLATE_FILE = template.yaml
+
+# スタック名
+STACK_NAME=$(ENV)-$(STACK_NAME_BASE)
+
+# SAM Build
+build:
+	sam build --use-container
+
+# 開発環境デプロイ
+deploy-dev: ENV=dev
+deploy-dev: build
+	sam deploy --stack-name $(STACK_NAME) \
+	  --parameter-overrides Environment=$(ENV) S3Bucket=$(DEV_S3_BUCKET) S3Prefix=$(DEV_S3_PREFIX) \
+	  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+          --resolve-s3
+
+# 本番環境デプロイ
+deploy-prod: ENV=prod
+deploy-prod: build
+	sam deploy --stack-name $(STACK_NAME) \
+	  --parameter-overrides Environment=$(ENV) S3Bucket=$(PRD_S3_BUCKET) S3Prefix=$(PRD_S3_PREFIX) \
+	  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+          --resolve-s3
